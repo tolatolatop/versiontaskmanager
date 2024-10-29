@@ -11,8 +11,12 @@ class TaskCreate(TaskBase):
     pass
 
 
+class TaskUpdateStatus(BaseModel):
+    status: str
+
+
 class Task(TaskBase):
-    task_id: uuid.UUID
+    task_id: str
     status: str
     created_at: datetime
     updated_at: datetime

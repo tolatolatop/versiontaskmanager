@@ -40,6 +40,16 @@ async def read_task(task_id: str, request: Request, db: Session = Depends(get_db
     )
 
 
+@app.put("/tasks/{task_id}/status", response_model=schemas.Task)
+def update_task_status(
+    task_id: str, status_update: schemas.TaskUpdateStatus, db: Session = Depends(get_db)
+):
+    task = crud.update_task_status(db, task_id=task_id, status=status_update.status)
+    if task is None:
+        return {"error": "任务未找到"}
+    return task
+
+
 @app.websocket("/tasks/{task_id}/logs/ws")
 async def websocket_endpoint(websocket: WebSocket, task_id: str):
     await websocket.accept()
