@@ -4,6 +4,8 @@ from fastapi.templating import Jinja2Templates
 from . import models, schemas, crud
 from .database import SessionLocal, engine
 import os
+import asyncio
+import aiofiles
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -55,11 +57,13 @@ async def websocket_endpoint(websocket: WebSocket, task_id: str):
     await websocket.accept()
     log_path = f"logs/{task_id}.log"
     try:
-        with open(log_path, "r") as log_file:
+        async with aiofiles.open(log_path, mode="r") as log_file:
             while True:
-                line = log_file.readline()
+                line = await log_file.readline()
                 if line:
                     await websocket.send_text(line)
+                else:
+                    await asyncio.sleep(1)
     except WebSocketDisconnect:
         print(f"WebSocket for task {task_id} disconnected")
 

@@ -1,6 +1,18 @@
+import logging
 from sqlalchemy.orm import Session
 from . import models, schemas
 import datetime
+
+
+def time_record(func):
+    def wrapper(*args, **kwargs):
+        start_time = datetime.datetime.now()
+        result = func(*args, **kwargs)
+        end_time = datetime.datetime.now()
+        logging.warning(f"Function {func.__name__} executed in {end_time - start_time}")
+        return result
+
+    return wrapper
 
 
 def create_task(db: Session, task: schemas.TaskCreate):
@@ -16,6 +28,7 @@ def create_task(db: Session, task: schemas.TaskCreate):
     return db_task
 
 
+@time_record
 def get_tasks(db: Session, skip: int = 0, limit: int = 10):
     return db.query(models.Task).offset(skip).limit(limit).all()
 
