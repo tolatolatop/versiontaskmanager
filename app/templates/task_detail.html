@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>任务详情</title>
+    <script>
+        function connectWebSocket(taskId) {
+            let ws = new WebSocket(`ws://${window.location.host}/tasks/${taskId}/logs/ws`);
+            ws.onmessage = function (event) {
+                let logArea = document.getElementById("logArea");
+                logArea.value += event.data;
+            };
+        }
+    </script>
+</head>
+
+<body onload="connectWebSocket('{{ task.task_id }}')">
+    <h1>任务详情</h1>
+    <p><strong>任务ID：</strong> {{ task.task_id }}</p>
+    <p><strong>任务名称：</strong> {{ task.task_name }}</p>
+    <p><strong>状态：</strong> {{ task.status }}</p>
+    <p><strong>创建时间：</strong> {{ task.created_at }}</p>
+    <p><strong>更新时间：</strong> {{ task.updated_at }}</p>
+    <h2>执行日志</h2>
+    <textarea id="logArea" rows="20" cols="100"></textarea>
+    <a href="/">返回任务列表</a>
+</body>
+
+</html>
