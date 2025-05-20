@@ -33,3 +33,52 @@ class Task(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class TaskResult(models.Model):
+    RESULT_STATUS_CHOICES = [
+        ('success', '成功'),
+        ('failed', '失败'),
+        ('error', '错误'),
+    ]
+
+    task = models.OneToOneField(
+        Task,
+        on_delete=models.CASCADE,
+        related_name='result',
+        verbose_name='关联任务'
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=RESULT_STATUS_CHOICES,
+        default='success',
+        verbose_name='结果状态'
+    )
+    result_data = models.JSONField(
+        default=dict,
+        verbose_name='结果数据'
+    )
+    error_message = models.TextField(
+        blank=True,
+        verbose_name='错误信息'
+    )
+    execution_time = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name='执行时间(秒)'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='创建时间'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='更新时间'
+    )
+
+    class Meta:
+        verbose_name = '任务结果'
+        verbose_name_plural = '任务结果'
+
+    def __str__(self):
+        return f"{self.task.title} - {self.status}"
