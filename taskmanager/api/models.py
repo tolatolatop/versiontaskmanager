@@ -35,19 +35,13 @@ class Task(models.Model):
         return self.title
 
 
-class TaskResult(models.Model):
+class Result(models.Model):
     RESULT_STATUS_CHOICES = [
         ('success', '成功'),
         ('failed', '失败'),
         ('error', '错误'),
     ]
 
-    task = models.OneToOneField(
-        Task,
-        on_delete=models.CASCADE,
-        related_name='result',
-        verbose_name='关联任务'
-    )
     status = models.CharField(
         max_length=20,
         choices=RESULT_STATUS_CHOICES,
@@ -77,8 +71,41 @@ class TaskResult(models.Model):
     )
 
     class Meta:
-        verbose_name = '任务结果'
-        verbose_name_plural = '任务结果'
+        ordering = ['-created_at']
+        verbose_name = '结果'
+        verbose_name_plural = '结果'
 
     def __str__(self):
-        return f"{self.task.title} - {self.status}"
+        return f"Result {self.id} - {self.status}"
+
+
+class TaskResult(models.Model):
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        related_name='task_results',
+        verbose_name='任务'
+    )
+    result = models.ForeignKey(
+        Result,
+        on_delete=models.CASCADE,
+        related_name='task_results',
+        verbose_name='结果'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='创建时间'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='更新时间'
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = '任务结果关联'
+        verbose_name_plural = '任务结果关联'
+        unique_together = ['task', 'result']
+
+    def __str__(self):
+        return f"Task {self.task.id} - Result {self.result.id}"

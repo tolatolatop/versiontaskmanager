@@ -2,10 +2,19 @@ from django.shortcuts import render
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Task, TaskResult
-from .serializers import TaskSerializer, TaskResultSerializer
+from .models import Task, Result, TaskResult
+from .serializers import TaskSerializer, ResultSerializer, TaskResultSerializer
 
 # Create your views here.
+
+
+class ResultViewSet(viewsets.ModelViewSet):
+    queryset = Result.objects.all()
+    serializer_class = ResultSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Result.objects.filter(task_results__task__owner=self.request.user)
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -17,9 +26,21 @@ class TaskViewSet(viewsets.ModelViewSet):
         return Task.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
-        task = serializer.save(owner=self.request.user)
-        # 创建关联的任务结果
-        TaskResult.objects.create(task=task)
+        serializer.save(owner=self.request.user)
+
+
+class TaskResultViewSet(viewsets.ModelViewSet):
+    queryset = TaskResult.objects.all()
+    serializer_class = TaskResultSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return TaskResult.objects.filter(task__owner=self.request.user)
+
+    def perform_create(self, serializer):
+        task_id = self.request.data.get('task')
+        task = Task.objects.get(id=task_id, owner=self.request.user)
+        serializer.save(task=task)
 
     @action(detail=True, methods=['post'])
     def update_result(self, request, pk=None):
