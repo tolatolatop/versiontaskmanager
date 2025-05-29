@@ -1,0 +1,26 @@
+@startuml Main
+!theme plain
+skinparam componentStyle rectangle
+
+actor 用户 as User
+participant "主服务器" as Server
+participant "外部数据源" as DataSource
+participant "执行器" as Executor
+
+User -> Server: 提交任务
+activate Server
+
+Server -> DataSource: 获取任务配置
+activate DataSource
+DataSource --> Server: 返回配置信息
+deactivate DataSource
+
+Server -> Executor: 分配任务
+activate Executor
+Executor --> Server: 任务执行状态
+deactivate Executor
+
+Server --> User: 返回任务结果
+deactivate Server
+
+@enduml
