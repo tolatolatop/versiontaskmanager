@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Task, Result, TaskResult
+from .models import Version, Manifest, VersionConfig
 
 
 class ResultSerializer(serializers.ModelSerializer):
@@ -37,3 +38,31 @@ class TaskResultSerializer(serializers.ModelSerializer):
         task_result = TaskResult.objects.create(
             result=result, **validated_data)
         return task_result
+
+
+class VersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Version
+        fields = ['id', 'product_id', 'version_name',
+                  'version_description', 'version_created_at', 'version_updated_at']
+        read_only_fields = ['version_created_at', 'version_updated_at']
+
+
+class ManifestSerializer(serializers.ModelSerializer):
+    version = serializers.PrimaryKeyRelatedField(
+        queryset=Version.objects.all())
+
+    class Meta:
+        model = Manifest
+        fields = ['id', 'version', 'repo_url', 'repo_revision',
+                  'manifest_filepath', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class VersionConfigSerializer(serializers.ModelSerializer):
+    version = serializers.PrimaryKeyRelatedField(
+        queryset=Version.objects.all())
+
+    class Meta:
+        model = VersionConfig
+        fields = ['id', 'version', 'data', 'created_at', 'updated_at']

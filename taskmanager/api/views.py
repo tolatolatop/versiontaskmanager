@@ -3,7 +3,9 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Task, Result, TaskResult
+from .models import Version, Manifest, VersionConfig
 from .serializers import TaskSerializer, ResultSerializer, TaskResultSerializer
+from .serializers import VersionSerializer, ManifestSerializer, VersionConfigSerializer
 
 # Create your views here.
 
@@ -53,3 +55,37 @@ class TaskResultViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VersionViewSet(viewsets.ModelViewSet):
+    queryset = Version.objects.all()
+    serializer_class = VersionSerializer
+    permission_classes = []
+
+    def get_queryset(self):
+        return Version.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class ManifestViewSet(viewsets.ModelViewSet):
+    queryset = Manifest.objects.all()
+    serializer_class = ManifestSerializer
+
+    def get_queryset(self):
+        return Manifest.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class VersionConfigViewSet(viewsets.ModelViewSet):
+    queryset = VersionConfig.objects.all()
+    serializer_class = VersionConfigSerializer
+
+    def get_queryset(self):
+        return VersionConfig.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save()

@@ -109,3 +109,58 @@ class TaskResult(models.Model):
 
     def __str__(self):
         return f"Task {self.task.id} - Result {self.result.id}"
+
+
+class Version(models.Model):
+    product_id = models.CharField(max_length=200, verbose_name='产品ID')
+    version_name = models.CharField(max_length=200, verbose_name='版本名称')
+    version_description = models.TextField(blank=True, verbose_name='版本描述')
+    version_created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name='创建时间')
+    version_updated_at = models.DateTimeField(
+        auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        ordering = ['-version_created_at']
+        verbose_name = '版本'
+        verbose_name_plural = '版本'
+
+
+class Manifest(models.Model):
+    version = models.ForeignKey(
+        Version,
+        on_delete=models.CASCADE,
+        related_name='manifests',
+        verbose_name='版本'
+    )
+    repo_url = models.CharField(max_length=200, verbose_name='仓库URL')
+    repo_revision = models.CharField(max_length=200, verbose_name='仓库版本')
+    manifest_filepath = models.CharField(
+        max_length=200, verbose_name='清单文件路径')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = '清单'
+        verbose_name_plural = '清单'
+
+
+class VersionConfig(models.Model):
+    version = models.ForeignKey(
+        Version,
+        on_delete=models.CASCADE,
+        related_name='configs',
+        verbose_name='版本'
+    )
+    data = models.JSONField(default=dict, verbose_name='版本配置')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = '版本配置'
+        verbose_name_plural = '版本配置'
+
+    def __str__(self):
+        return f"VersionConfig {self.id} - {self.version.version_name}"
