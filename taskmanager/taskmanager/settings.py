@@ -142,3 +142,8 @@ REST_FRAMEWORK = {
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True  # 仅在开发环境中使用
 CORS_ALLOW_CREDENTIALS = True
+
+# 登录相关配置
+LOGIN_REDIRECT_URL = '/api/'  # 登录成功后重定向到API首页
+LOGOUT_REDIRECT_URL = '/api/'  # 登出后重定向到API首页
+LOGIN_URL = '/api-auth/login/'  # 登录页面的URL
