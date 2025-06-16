@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - SERVICE_TYPE=web
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+
+  celery:
+    build: .
+    environment:
+      - SERVICE_TYPE=celery
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+
+  celery-beat:
+    build: .
+    environment:
+      - SERVICE_TYPE=celery-beat
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+
+  redis:
+    image: redis:7-alpine 

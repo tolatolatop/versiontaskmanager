@@ -147,3 +147,20 @@ CORS_ALLOW_CREDENTIALS = True
 LOGIN_REDIRECT_URL = '/api/'  # 登录成功后重定向到API首页
 LOGOUT_REDIRECT_URL = '/api/'  # 登出后重定向到API首页
 LOGIN_URL = '/api-auth/login/'  # 登录页面的URL
+
+# Celery配置
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
+# Celery Beat配置（如果需要定时任务）
+CELERY_BEAT_SCHEDULE = {
+    # 示例定时任务
+    'debug-task-every-30-seconds': {
+        'task': 'taskmanager.celery.debug_task',
+        'schedule': 30.0,
+    },
+}
