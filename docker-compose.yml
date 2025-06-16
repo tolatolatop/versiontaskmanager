@@ -7,28 +7,36 @@ services:
       - "8000:8000"
     environment:
       - SERVICE_TYPE=web
+      - DJANGO_SETTINGS_MODULE=taskmanager.settings
+      - PYTHONPATH=/app
     depends_on:
       - redis
     volumes:
-      - .:/app
+      - ./taskmanager:/app/taskmanager
 
   celery:
     build: .
     environment:
       - SERVICE_TYPE=celery
+      - DJANGO_SETTINGS_MODULE=taskmanager.settings
+      - PYTHONPATH=/app
     depends_on:
       - redis
+      - web
     volumes:
-      - .:/app
+      - ./taskmanager:/app/taskmanager
 
   celery-beat:
     build: .
     environment:
       - SERVICE_TYPE=celery-beat
+      - DJANGO_SETTINGS_MODULE=taskmanager.settings
+      - PYTHONPATH=/app
     depends_on:
       - redis
+      - web
     volumes:
-      - .:/app
+      - ./taskmanager:/app/taskmanager
 
   redis:
     image: redis:7-alpine 

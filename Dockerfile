@@ -10,7 +10,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     POETRY_VERSION=1.7.1 \
     POETRY_HOME="/opt/poetry" \
     POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_NO_INTERACTION=1
+    POETRY_NO_INTERACTION=1 \
+    PYTHONPATH=/app
 
 # 安装系统依赖
 RUN apt-get update \
@@ -24,7 +25,7 @@ RUN pip3 install poetry
 
 # 复制项目文件
 COPY pyproject.toml poetry.lock ./
-COPY taskmanager ./taskmanager  
+COPY taskmanager ./taskmanager
 
 FROM base as app
 # 安装项目依赖
@@ -35,9 +36,9 @@ EXPOSE 8000
 
 # 设置启动命令（使用环境变量来决定启动Django还是Celery）
 CMD if [ "$SERVICE_TYPE" = "celery" ]; then \
-        celery -A taskmanager worker -l INFO; \
+        cd /app/taskmanager && python -m celery -A taskmanager.celery worker -l INFO; \
     elif [ "$SERVICE_TYPE" = "celery-beat" ]; then \
-        celery -A taskmanager beat -l INFO; \
+        cd /app/taskmanager && python -m celery -A taskmanager.celery beat -l INFO; \
     else \
-        python taskmanager/manage.py runserver 0.0.0.0:8000; \
+        cd /app/taskmanager && python manage.py runserver 0.0.0.0:8000; \
     fi 
