@@ -14,7 +14,7 @@ router.register(r'version-configs', VersionConfigViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('tasks/trigger/', TaskTriggerView.as_view(), name='task-trigger'),
-    path('tasks/status/<str:task_id>/',
+    path('c-tasks/trigger/', TaskTriggerView.as_view(), name='task-trigger'),
+    path('c-tasks/status/<str:task_id>/',
          TaskStatusView.as_view(), name='task-status'),
 ]
