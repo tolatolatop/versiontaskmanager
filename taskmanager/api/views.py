@@ -6,6 +6,9 @@ from .models import Task, Result, TaskResult
 from .models import Version, Manifest, VersionConfig
 from .serializers import TaskSerializer, ResultSerializer, TaskResultSerializer
 from .serializers import VersionSerializer, ManifestSerializer, VersionConfigSerializer
+from rest_framework.views import APIView
+from .tasks import simple_task
+import uuid
 
 # Create your views here.
 
@@ -89,3 +92,58 @@ class VersionConfigViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save()
+
+
+class TaskTriggerView(APIView):
+    """
+    用于触发Celery任务的API视图
+    """
+
+    def post(self, request):
+        # 生成唯一的任务ID
+        task_id = str(uuid.uuid4())
+
+        # 从请求中获取延迟时间，默认为5秒
+        delay_seconds = request.data.get('delay_seconds', 5)
+
+        # 异步执行任务
+        task = simple_task.delay(task_id, delay_seconds)
+
+        return Response({
+            'task_id': task_id,
+            'celery_task_id': task.id,
+            'status': 'pending',
+            'message': f'Task {task_id} has been queued'
+        }, status=status.HTTP_202_ACCEPTED)
+
+
+class TaskStatusView(APIView):
+    """
+    用于查询任务状态的API视图
+    """
+
+    def get(self, request, task_id):
+        from celery.result import AsyncResult
+
+        # 获取Celery任务结果
+        task_result = AsyncResult(task_id)
+
+        if task_result.ready():
+            if task_result.successful():
+                return Response({
+                    'task_id': task_id,
+                    'status': 'completed',
+                    'result': task_result.result
+                })
+            else:
+                return Response({
+                    'task_id': task_id,
+                    'status': 'failed',
+                    'error': str(task_result.result)
+                }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({
+                'task_id': task_id,
+                'status': 'pending',
+                'message': 'Task is still running'
+            })
